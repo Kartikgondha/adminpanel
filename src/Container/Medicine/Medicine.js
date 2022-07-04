@@ -33,6 +33,7 @@ function Medicine(props) {
         setDOpen(false);
     };
 
+    
     const handleInsert = (values) => {
 
         let id = Math.floor(Math.random() * 1000);
