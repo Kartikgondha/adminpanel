@@ -11,6 +11,8 @@ import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import {useDispatch, useSelector} from 'react-redux'
+import { addMedicine, DeleteMedicine, EditMedicine, getMedicine } from '../../redux/Action/medicine.action';
 
 function Medicine(props) {
 
@@ -19,6 +21,10 @@ function Medicine(props) {
     const [data, setdata] = useState([]);
     const [did, setDid] = useState(0);
     const [update, setUpdate] = useState(false);
+    const [FilterData, setFilterData] = useState([]);
+
+    const dispatch = useDispatch();
+    const medicine = useSelector(state => state.medicine);
 
     const handleDClickOpen = () => {
         setDOpen(true);
@@ -33,7 +39,7 @@ function Medicine(props) {
         setDOpen(false);
     };
 
-    
+
     const handleInsert = (values) => {
 
         let id = Math.floor(Math.random() * 1000);
@@ -42,14 +48,16 @@ function Medicine(props) {
             id: id,
             ...values
         }
-        let localData = JSON.parse(localStorage.getItem('Medicine'));
-        if (localData === null) {
-            localStorage.setItem("Medicine", JSON.stringify([data]));
-        } else {
-            localData.push(data);
-            localStorage.setItem("Medicine", JSON.stringify(localData));
+        // let localData = JSON.parse(localStorage.getItem('Medicine'));
+        // if (localData === null) {
+        //     localStorage.setItem("Medicine", JSON.stringify([data]));
+        // } else {
+        //     localData.push(data);
+        //     localStorage.setItem("Medicine", JSON.stringify(localData));
 
-        }
+        // }
+
+        dispatch(addMedicine(data))
 
         loadData();
         handleClose();
@@ -65,22 +73,25 @@ function Medicine(props) {
     });
 
     let handleUpdateData = (values) => {
-        let localData = JSON.parse(localStorage.getItem('Medicine'));
-        let Udata = localData.map((l) => {
-            if (l.id === values.id) {
-                return values;
-            } else {
-                return l;
-            }
-        })
-        localStorage.setItem('Medicine', JSON.stringify(Udata));
+        // let localData = JSON.parse(localStorage.getItem('Medicine'));
+        // let Udata = localData.map((l) => {
+        //     if (l.id === values.id) {
+        //         return values;
+        //     } else {
+        //         return l;
+        //     }
+        // })
+        // localStorage.setItem('Medicine', JSON.stringify(Udata));
         // console.log(Udata);
+
+        dispatch(EditMedicine(values))
+
         handleClose();
         setUpdate(false);
         loadData();
         formikobj.resetForm();
     }
- 
+
     const formikobj = useFormik({
         initialValues: {
             name: '',
@@ -100,10 +111,12 @@ function Medicine(props) {
     });
 
     const handleDelete = (params) => {
-        let localData = JSON.parse(localStorage.getItem('Medicine'));
-        let fData = localData.filter((l) => l.id !== did)
-        console.log(fData);
-        localStorage.setItem("Medicine", JSON.stringify(fData));
+        // let localData = JSON.parse(localStorage.getItem('Medicine'));
+        // let fData = localData.filter((l) => l.id !== did)
+        // console.log(fData);
+        // localStorage.setItem("Medicine", JSON.stringify(fData));
+
+        dispatch(DeleteMedicine(did))
         loadData();
         handleClose();
 
@@ -152,20 +165,59 @@ function Medicine(props) {
 
     useEffect(
         () => {
-            loadData();
+            // loadData();
+            dispatch(getMedicine())
         }, [])
 
     const { handleChange, handleSubmit, handleBlur, errors, touched, values } = formikobj
 
     console.log(data);
+
+    let handleSearch=(val)=>{
+    //console.log(val);
+    
+    let localData= JSON.parse(localStorage.getItem('Medicine'));
+    
+    let FData = localData.filter((l) =>(
+        l.name.toLowerCase().includes(val.toLowerCase()) ||
+        l.price.toString().includes(val) ||
+        l.quantity.toString().includes(val) ||
+        l.expiry.toString().includes(val) 
+    ))
+    //console.log(FData);
+    setFilterData(FData);
+    }
+
+    const finalData = FilterData.length > 0 ? FilterData : data
+
     return (
+
+        medicine.isLoding ?
+        <p>Loading ...</p>
+        :
+        medicine.error != '' ?
+        <p>{medicine.error}</p>
+        :
         <div>
             <Button variant="outlined" onClick={handleClickOpen}>
                 Open form dialog
             </Button>
+
+            <TextField
+              
+                margin="dense"
+                name="search"
+                label="Search Medicine"
+                type="text"
+                fullWidth
+                variant="standard"
+                onChange={(e) => handleSearch(e.target.value)}
+            />
+
+
             <div style={{ height: 400, width: '100%' }}>
                 <DataGrid
-                    rows={data}
+                    rows={medicine.medicine}
                     columns={columns}
                     pageSize={5}
                     rowsPerPageOptions={[5]}
@@ -259,7 +311,7 @@ function Medicine(props) {
                 </Formik>
 
             </Dialog>
-        </div >
+        </div > 
     );
 }
 

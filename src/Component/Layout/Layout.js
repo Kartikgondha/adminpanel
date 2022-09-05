@@ -22,6 +22,8 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import PersonIcon from '@mui/icons-material/Person';
 import { NavLink } from 'react-router-dom'
 import { DataGrid } from '@mui/x-data-grid';
+import VaccinesIcon from '@mui/icons-material/Vaccines';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 
 
 const drawerWidth = 240;
@@ -108,7 +110,11 @@ export default function Layout({children}) {
 
   const ListItemMenu = [
     { label: 'Medicine', to: '/medicine', icon: <MedicalServicesIcon /> },
-    { label: 'Patient', to: '/patient', icon: <PersonIcon /> }
+    { label: 'Patient', to: '/patient', icon: <PersonIcon /> },
+    {label: 'doctor', to: '/doctor', icon: <VaccinesIcon/>},
+    { label: 'Counter', to: '/counter', icon: <HourglassTopIcon /> },
+    { label: 'UseMemoExample', to: '/UseMemoExample', icon: <HourglassTopIcon /> },
+    { label: 'UseCallBack', to: '/UseCallBack', icon: <HourglassTopIcon /> },
   ]
 
   return (
@@ -136,7 +142,9 @@ export default function Layout({children}) {
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'rtl' ?  <MedicalServicesIcon /> : <PersonIcon />}
+          <ChevronLeftIcon/>
+          {/* <VaccinesIcon/>
+          <PersonIcon /> */}
           </IconButton>
         </DrawerHeader>
         <Divider />
