@@ -2,17 +2,31 @@ import { deleteAllMedicineData, editAllMedicineData, getAllMedicineData, postAll
 import { getAllPatientData } from '../../common/apis/patient.api';
 import { BASE_URL } from '../../Share/baseurl';
 import * as Actiontype from '../actiontype'
+import { db } from '../../Firebase'
+import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore"; 
+import { async } from '@firebase/util';
 
 
-export const getMedicine = () => (dispatch) => {
+
+export const getMedicine = () => async(dispatch) => {
   try {
-    dispatch(lodingMedicine())
 
-    setTimeout(function () {
+    const querySnapshot = await getDocs(collection(db, "medicine"));
+    let data = [];
+    querySnapshot.forEach((doc) => {
+  data.push({ id: doc.id, ...doc.data()});
+  console.log(`${doc.id} => ${doc.data()}`);
+  console.log(data);
+});
+   
+dispatch(({ type: Actiontype.GET_MEDICINE, payload: data }))
+    //dispatch(lodingMedicine())
 
-      getAllMedicineData()
-        .then(data => dispatch(({ type: Actiontype.GET_MEDICINE, payload: data.data })))
-        .catch(error => dispatch(ErrorMedicine(error.message)));
+    // setTimeout(function () {
+
+      // getAllMedicineData()
+      //   .then(data => dispatch(({ type: Actiontype.GET_MEDICINE, payload: data.data })))
+      //   .catch(error => dispatch(ErrorMedicine(error.message)));
 
       // fetch(BASE_URL + 'medicine')
       //   .then(response => {
@@ -31,7 +45,7 @@ export const getMedicine = () => (dispatch) => {
       //   .then(response => response.json())
       //   .then(data => dispatch(({ type: Actiontype.GET_MEDICINE, payload: data })))
       //   .catch(error => dispatch(ErrorMedicine(error.message)));
-    }, 2000)
+    // }, 2000)
   } catch (error) {
     dispatch(ErrorMedicine(error.message))
   }
@@ -39,11 +53,22 @@ export const getMedicine = () => (dispatch) => {
 }
 
 
-export const EditMedicine = (data) => (dispatch) => {
+export const EditMedicine = (data) => async(dispatch) => {
   try {
-    editAllMedicineData(data)
-      .then(data => dispatch({ type: Actiontype.EDIT_MEDICINE, payload: data.data}))
-      .catch((error) => dispatch(ErrorMedicine(error.message)))
+    const MedicineRef = doc(db, "medicine", data.id);
+
+
+await updateDoc(MedicineRef, {
+  name: data.name,
+  price: data.price,
+  quantity: data.quantity,
+  expiry: data.expiry,
+
+});
+dispatch({ type: Actiontype.EDIT_MEDICINE, payload: data})
+    // editAllMedicineData(data)
+    //   .then(data => dispatch({ type: Actiontype.EDIT_MEDICINE, payload: data.data}))
+    //   .catch((error) => dispatch(ErrorMedicine(error.message)))
 
 
     // fetch(BASE_URL + 'medicine/' + data.id, {
@@ -75,14 +100,21 @@ export const EditMedicine = (data) => (dispatch) => {
   }
 }
 
-export const addMedicine = (data) => (dispatch) => {
+export const addMedicine = (data) => async(dispatch) => {
+ console.log(data);
   try {
-    dispatch(lodingMedicine())
-
-    setTimeout(function () {
-      postAllMedicineData(data)
-        .then(data => dispatch(({ type: Actiontype.ADD_MEDICINE, payload: data.data })))
-        .catch(error => dispatch(ErrorMedicine(error.message)));
+    const docRef = await addDoc(collection(db, "medicine"), data);
+    
+    dispatch({ type: Actiontype.ADD_MEDICINE, payload: {id: docRef.id,...data}})
+    console.log("Document written with ID: ", docRef.id);
+    // dispatch(lodingMedicine())
+    
+    
+    
+    // setTimeout(function () {
+    //   postAllMedicineData(data)
+    //     .then(data => dispatch(({ type: Actiontype.ADD_MEDICINE, payload: data.data })))
+    //     .catch(error => dispatch(ErrorMedicine(error.message)));
 
       // fetch(BASE_URL + 'medicine', {
       //   method: 'POST', // or 'PUT'
@@ -94,22 +126,25 @@ export const addMedicine = (data) => (dispatch) => {
       //   .then(response => response.json())
       //   .then(data => dispatch(({ type: Actiontype.ADD_MEDICINE, payload: data })))
       //   .catch(error => dispatch(ErrorMedicine(error.message)));
-    }, 2000)
+    // }, 2000)
 
   } catch (error) {
     dispatch(ErrorMedicine(error.message))
   }
 }
 
-export const DeleteMedicine = (id) => (dispatch) => {
+export const DeleteMedicine = (id) => async(dispatch) => {
   try {
-    dispatch(lodingMedicine())
+    await deleteDoc(doc(db, "medicine", "id"));
+    dispatch(({ type: Actiontype.DELETE_MEDICINE, payload: id }))
 
-    setTimeout(function () {
+    // dispatch(lodingMedicine())
 
-      deleteAllMedicineData(id)
-        .then(dispatch(({ type: Actiontype.DELETE_MEDICINE, payload: id })))
-        .catch(error => dispatch(ErrorMedicine(error.message)));
+    // setTimeout(function () {
+
+    //   deleteAllMedicineData(id)
+    //     .then(dispatch(({ type: Actiontype.DELETE_MEDICINE, payload: id })))
+    //     .catch(error => dispatch(ErrorMedicine(error.message)));
 
 
       // fetch(BASE_URL + 'medicine/' + id, {
@@ -120,7 +155,7 @@ export const DeleteMedicine = (id) => (dispatch) => {
       // })
       //   .then(dispatch(({ type: Actiontype.DELETE_MEDICINE, payload: id })))
       //   .catch(error => dispatch(ErrorMedicine(error.message)));
-    }, 2000)
+    // }, 2000)
   } catch (error) {
     dispatch(ErrorMedicine(error.message))
   }
