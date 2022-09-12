@@ -2,9 +2,10 @@ import { deleteAllMedicineData, editAllMedicineData, getAllMedicineData, postAll
 import { getAllPatientData } from '../../common/apis/patient.api';
 import { BASE_URL } from '../../Share/baseurl';
 import * as Actiontype from '../actiontype'
-import { db } from '../../Firebase'
+import { db, storage } from '../../Firebase'
 import { collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore"; 
 import { async } from '@firebase/util';
+import { getDownloadURL, ref, uploadBytes } from 'firebase/storage'
 
 
 
@@ -103,10 +104,16 @@ dispatch({ type: Actiontype.EDIT_MEDICINE, payload: data})
 export const addMedicine = (data) => async(dispatch) => {
  console.log(data);
   try {
-    const docRef = await addDoc(collection(db, "medicine"), data);
-    
-    dispatch({ type: Actiontype.ADD_MEDICINE, payload: {id: docRef.id,...data}})
-    console.log("Document written with ID: ", docRef.id);
+    const medRef = ref(storage, 'medicine/' + data.FIleimage.name)
+    uploadBytes(medRef,data.FIleimage).then(async (snapshot) => {
+      getDownloadURL(ref(storage, 'medicine/' + data.FIleimage.name))
+      .then( async (url) => {
+        console.log(url);
+      const docRef = await addDoc(collection(db, 'medicine'), {...data,FIleimage:url})
+      dispatch({type: Actiontype.ADD_MEDICINE, payload: { ...data, id: docRef.id }})
+      })
+    });
+   
     // dispatch(lodingMedicine())
     
     
@@ -135,7 +142,7 @@ export const addMedicine = (data) => async(dispatch) => {
 
 export const DeleteMedicine = (id) => async(dispatch) => {
   try {
-    await deleteDoc(doc(db, "medicine", "id"));
+    await deleteDoc(doc(db, "medicine", id));
     dispatch(({ type: Actiontype.DELETE_MEDICINE, payload: id }))
 
     // dispatch(lodingMedicine())
