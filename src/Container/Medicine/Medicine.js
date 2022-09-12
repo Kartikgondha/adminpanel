@@ -18,6 +18,7 @@ import {
   EditMedicine,
   getMedicine,
 } from "../../redux/Action/medicine.action";
+import { render } from "@testing-library/react";
 
 function Medicine(props) {
   const [open, setOpen] = React.useState(false);
@@ -136,6 +137,13 @@ function Medicine(props) {
     { field: "price", headerName: "price", width: 130 },
     { field: "quantity", headerName: "quantity", width: 130 },
     { field: "expiry", headerName: "expiry", width: 130 },
+    { field: "FIleimage",
+     headerName: "Profile Image", 
+     width: 130 ,
+    renderCell : (params) => (
+      <img src={params.row.FIleimage} width={50} height={50}/>
+    )
+    },
     {
       field: "action",
       headerName: "Action",

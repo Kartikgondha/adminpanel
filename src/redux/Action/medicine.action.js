@@ -104,13 +104,16 @@ dispatch({ type: Actiontype.EDIT_MEDICINE, payload: data})
 export const addMedicine = (data) => async(dispatch) => {
  console.log(data);
   try {
-    const medRef = ref(storage, 'medicine/' + data.FIleimage.name)
+
+    let UploadFile = Math.floor(Math.random()*1000).toString();
+
+    const medRef = ref(storage, 'medicine/' + UploadFile)
     uploadBytes(medRef,data.FIleimage).then(async (snapshot) => {
-      getDownloadURL(ref(storage, 'medicine/' + data.FIleimage.name))
+      getDownloadURL(snapshot.ref)
       .then( async (url) => {
         console.log(url);
-      const docRef = await addDoc(collection(db, 'medicine'), {...data,FIleimage:url})
-      dispatch({type: Actiontype.ADD_MEDICINE, payload: { ...data, id: docRef.id }})
+      const medRef = await addDoc(collection(db, 'medicine'), {...data,FIleimage:url, UploadFile:UploadFile})
+      dispatch({type: Actiontype.ADD_MEDICINE, payload: { id: medRef.id, ...data,FIleimage:url, UploadFile:UploadFile }})
       })
     });
    
