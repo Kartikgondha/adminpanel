@@ -155,7 +155,7 @@ function Medicine(props) {
             size="large"
             onClick={() => {
               handleDClickOpen();
-              setDid(params.id);
+              setDid(params.row);
             }}
           >
             <DeleteIcon fontSize="inherit" />
