@@ -10,7 +10,6 @@ import { Form, Formik, useFormik } from 'formik';
 import { DataGrid } from '@mui/x-data-grid';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 
 function Patient(props) {
     const [open, setOpen] = React.useState(false);
@@ -115,7 +114,7 @@ function Patient(props) {
                         <DeleteIcon />
                     </IconButton>
                     <IconButton aria-label="edit" onClick={() => handleEdit(params)}>
-                        <EditOffIcon />
+                        
                     </IconButton>
                 </>
             )
